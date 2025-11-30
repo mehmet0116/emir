@@ -28,13 +28,6 @@
             </intent-filter>
         </activity>
         
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SekerPatlatma.Splash"
-            android:noHistory="true">
-        </activity>
-        
     </application>
 
 </manifest>
