@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="@drawable/glass_card"
+        android:layout_margin="12dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/button_circle"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Geri"
+            android:padding="12dp"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/tvLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Seviye 1"
+            android:textSize="16sp"
+            android:textColor="#1A1A2E"
+            android:textStyle="bold"
+            android:background="@drawable/badge_level"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginStart="12dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HAMLE"
+                    android:textSize="10sp"
+                    android:textColor="#80FFFFFF"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvMoves"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30"
+                    android:textSize="20sp"
+                    android:textColor="#FF1744"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginStart="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PUAN"
+                    android:textSize="10sp"
+                    android:textColor="#80FFFFFF"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="20sp"
+                    android:textColor="#00E5FF"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginStart="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HEDEF"
+                    android:textSize="10sp"
+                    android:textColor="#80FFFFFF"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTarget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1000"
+                    android:textSize="20sp"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Progress Bar with Stars -->
+    <FrameLayout
+        android:id="@+id/progressContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/header">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/progress_bar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/star1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐"
+                android:textSize="18sp"
+                android:alpha="0.3"
+                android:layout_marginHorizontal="32dp" />
+
+            <TextView
+                android:id="@+id/star2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐"
+                android:textSize="18sp"
+                android:alpha="0.3"
+                android:layout_marginHorizontal="32dp" />
+
+            <TextView
+                android:id="@+id/star3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐"
+                android:textSize="18sp"
+                android:alpha="0.3"
+                android:layout_marginHorizontal="32dp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Combo Indicator -->
+    <TextView
+        android:id="@+id/tvCombo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3x SÜPER!"
+        android:textSize="36sp"
+        android:textColor="#FFD700"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:elevation="100dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Game Board -->
+    <com.sekerpatlatma.game.view.GameBoardView
+        android:id="@+id/gameBoardView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:layout_constraintTop_toBottomOf="@id/progressContainer"
+        app:layout_constraintBottom_toTopOf="@id/controlsContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="1:1" />
+
+    <!-- Controls -->
+    <LinearLayout
+        android:id="@+id/controlsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnHint"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="💡 İPUCU"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@drawable/button_secondary"
+            android:paddingHorizontal="24dp"
+            android:elevation="4dp"
+            android:stateListAnimator="@null" />
+
+        <Button
+            android:id="@+id/btnShuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:text="🔄 KARIŞTIR"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@drawable/button_secondary"
+            android:paddingHorizontal="24dp"
+            android:elevation="4dp"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
