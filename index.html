@@ -209,6 +209,51 @@
         </div>
     </div>
 
+    <!-- Çıkış Onay Popup -->
+    <div id="exit-confirm" class="screen overlay">
+        <div class="popup-container confirm">
+            <div class="popup-content">
+                <h2 class="confirm-title">⚠️ Çıkmak İstiyor musun?</h2>
+                <p class="confirm-message">İlerlemeniz kaydedilmeyecek.</p>
+                <div class="popup-buttons">
+                    <button id="confirm-exit-btn" class="popup-btn primary-btn">
+                        ✓ Evet, Çık
+                    </button>
+                    <button id="cancel-exit-btn" class="popup-btn secondary-btn">
+                        ✗ Hayır, Devam Et
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tüm Seviyeler Tamamlandı Popup -->
+    <div id="all-complete" class="screen overlay">
+        <div class="popup-container celebration all-done">
+            <div class="confetti-container"></div>
+            <div class="popup-content">
+                <h2 class="celebration-title">🏆 MUHTEŞEM! 🏆</h2>
+                <p class="all-complete-message">Tüm seviyeleri tamamladın!</p>
+                <div class="trophy-animation">🎊🏆🎊</div>
+                <p class="all-complete-sub">Sen bir şampiyon sun!</p>
+                <button id="all-complete-menu-btn" class="popup-btn primary-btn">
+                    🏠 Ana Menü
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Karıştırma Bildirimi -->
+    <div id="shuffle-notice" class="screen overlay">
+        <div class="popup-container notice">
+            <div class="popup-content">
+                <div class="notice-icon">🔄</div>
+                <h2 class="notice-title">Tahta Karıştırılıyor</h2>
+                <p class="notice-message">Geçerli hamle kalmadı!</p>
+            </div>
+        </div>
+    </div>
+
     <script src="js/game.js"></script>
 </body>
 </html>

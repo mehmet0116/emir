@@ -43,6 +43,9 @@ for (let i = 1; i <= GAME_CONFIG.totalLevels; i++) {
     });
 }
 
+// Global AudioContext instance (ses efektleri için)
+let audioContext = null;
+
 // ==========================================
 // OYUN DURUMU
 // ==========================================
@@ -121,6 +124,14 @@ const elements = {
     closeSettings: document.getElementById('close-settings'),
     continueBtn: document.getElementById('continue-btn'),
     
+    // Yeni Popup Elemanları
+    exitConfirm: document.getElementById('exit-confirm'),
+    confirmExitBtn: document.getElementById('confirm-exit-btn'),
+    cancelExitBtn: document.getElementById('cancel-exit-btn'),
+    allComplete: document.getElementById('all-complete'),
+    allCompleteMenuBtn: document.getElementById('all-complete-menu-btn'),
+    shuffleNotice: document.getElementById('shuffle-notice'),
+    
     // Ayarlar
     soundToggle: document.getElementById('sound-toggle'),
     musicToggle: document.getElementById('music-toggle'),
@@ -195,6 +206,19 @@ function setupEventListeners() {
     elements.closeSettings.addEventListener('click', hideSettings);
     elements.continueBtn.addEventListener('click', hideNewLevelUnlock);
     
+    // Çıkış Onay Popup
+    elements.confirmExitBtn.addEventListener('click', () => {
+        hideExitConfirm();
+        showMainMenu();
+    });
+    elements.cancelExitBtn.addEventListener('click', hideExitConfirm);
+    
+    // Tüm Seviyeler Tamamlandı
+    elements.allCompleteMenuBtn.addEventListener('click', () => {
+        hideAllComplete();
+        showMainMenu();
+    });
+    
     // Ayarlar
     elements.soundToggle.addEventListener('change', (e) => {
         gameState.settings.sound = e.target.checked;
@@ -246,9 +270,27 @@ function hideNewLevelUnlock() {
 }
 
 function confirmExit() {
-    if (confirm('Oyundan çıkmak istediğinize emin misiniz? İlerlemeniz kaydedilmeyecek.')) {
-        showMainMenu();
-    }
+    elements.exitConfirm.classList.add('active');
+}
+
+function hideExitConfirm() {
+    elements.exitConfirm.classList.remove('active');
+}
+
+function showAllComplete() {
+    createConfetti();
+    elements.allComplete.classList.add('active');
+}
+
+function hideAllComplete() {
+    elements.allComplete.classList.remove('active');
+}
+
+function showShuffleNotice() {
+    elements.shuffleNotice.classList.add('active');
+    setTimeout(() => {
+        elements.shuffleNotice.classList.remove('active');
+    }, 2000);
 }
 
 // ==========================================
@@ -315,8 +357,7 @@ function nextLevel() {
     if (gameState.currentLevel < GAME_CONFIG.totalLevels) {
         startLevel(gameState.currentLevel + 1);
     } else {
-        showMainMenu();
-        alert('🎉 Tebrikler! Tüm seviyeleri tamamladınız!');
+        showAllComplete();
     }
 }
 
@@ -335,8 +376,12 @@ function createBoard() {
         }
     }
     
-    // Başlangıçta eşleşme olmamasını sağla
-    while (findAllMatches().length > 0) {
+    // Başlangıçta eşleşme olmamasını sağla (maksimum 100 deneme)
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    while (findAllMatches().length > 0 && attempts < maxAttempts) {
+        attempts++;
         for (let row = 0; row < GAME_CONFIG.boardSize; row++) {
             for (let col = 0; col < GAME_CONFIG.boardSize; col++) {
                 const matches = findMatchesAt(row, col);
@@ -693,8 +738,10 @@ async function processMatches() {
         matches = findAllMatches();
     }
     
-    // Geçerli hamle yoksa karıştır
+    // Geçerli hamle yoksa karıştır ve kullanıcıya bildir
     if (!hasValidMoves()) {
+        showShuffleNotice();
+        await sleep(500);
         await shuffleBoard();
     }
 }
@@ -1126,38 +1173,48 @@ function createFloatingCandies() {
 // ==========================================
 // SES EFEKTLERİ
 // ==========================================
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
 function playSound(type) {
     if (!gameState.settings.sound) return;
     
-    // Web Audio API ile basit ses efektleri
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    const sounds = {
-        select: { freq: 400, duration: 0.1 },
-        match: { freq: 600, duration: 0.2 },
-        invalid: { freq: 200, duration: 0.3 },
-        star: { freq: 800, duration: 0.3 },
-        win: { freq: 1000, duration: 0.5 },
-        lose: { freq: 150, duration: 0.5 },
-        hint: { freq: 500, duration: 0.2 },
-        shuffle: { freq: 350, duration: 0.4 }
-    };
-    
-    const sound = sounds[type] || sounds.select;
-    
-    oscillator.frequency.value = sound.freq;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + sound.duration);
+    try {
+        const ctx = getAudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        const sounds = {
+            select: { freq: 400, duration: 0.1 },
+            match: { freq: 600, duration: 0.2 },
+            invalid: { freq: 200, duration: 0.3 },
+            star: { freq: 800, duration: 0.3 },
+            win: { freq: 1000, duration: 0.5 },
+            lose: { freq: 150, duration: 0.5 },
+            hint: { freq: 500, duration: 0.2 },
+            shuffle: { freq: 350, duration: 0.4 }
+        };
+        
+        const sound = sounds[type] || sounds.select;
+        
+        oscillator.frequency.value = sound.freq;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + sound.duration);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + sound.duration);
+    } catch (e) {
+        // Ses oynatılamadı, sessizce devam et
+    }
 }
 
 // ==========================================
