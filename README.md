@@ -8,18 +8,34 @@ Profesyonel seviye sistemi ve akıcı oyun mekaniği ile hazırlanmış eğlence
 - **Akıcı Animasyonlar**: Profesyonel görsel efektler ve geçişler
 - **Yıldız Sistemi**: Her seviyede 3 yıldıza kadar kazanın
 - **Kombo Sistemi**: Ardışık eşleşmelerle puan çarpanı
-- **Özel Şekerler**: Çizgili, paketli ve renk bombası şekerleri
+- **Özel Şekerler ve Bombalar**:
+  - 🔥 **Çizgili Şeker (↔️/↕️)**: 4'lü eşleşmede oluşur, tüm satırı veya sütunu patlatır
+  - 💣 **Paketli Bomba**: L veya T şeklinde eşleşmede oluşur, 3x3 alanı patlatır
+  - 🌈 **Renk Bombası**: 5'li eşleşmede oluşur, aynı renkteki tüm şekerleri patlatır
+- **Bomba Kombinasyonları**: İki özel şekeri birleştirerek süper patlamalar yapın!
 - **İpucu Sistemi**: Sıkıştığınızda yardım alın
 - **Karıştırma**: Geçerli hamle kalmadığında tahtayı karıştırın
 - **Mobil Uyumlu**: Dokunmatik ekranlar için optimize edilmiş
 
+## 💥 Bomba Kombinasyonları
+
+| Kombinasyon | Efekt |
+|-------------|-------|
+| Renk Bombası + Renk Bombası | Tüm tahtayı temizler! |
+| Renk Bombası + Özel Şeker | O renkteki tüm şekerleri özel şekere çevirir |
+| Paketli + Paketli | 5x5 mega patlama |
+| Çizgili + Çizgili | Artı şeklinde patlama (satır + sütun) |
+| Paketli + Çizgili | 3 satır ve 3 sütun patlatır |
+
 ## 🚀 Nasıl Oynanır
 
 1. Oyunu başlatmak için **Oyna** butonuna tıklayın
-2. İki komşu şekeri değiştirmek için sırayla tıklayın
+2. İki komşu şekeri değiştirmek için sırayla tıklayın veya kaydırın
 3. 3 veya daha fazla aynı şekeri eşleştirin
-4. Hedef puana ulaşarak seviyeyi tamamlayın
-5. Daha fazla yıldız kazanmak için daha yüksek puanlar yapın
+4. 4'lü ve 5'li eşleşmelerle özel şekerler oluşturun
+5. Bombaları patlatarak büyük puanlar kazanın
+6. Hedef puana ulaşarak seviyeyi tamamlayın
+7. Daha fazla yıldız kazanmak için daha yüksek puanlar yapın
 
 ## 📱 Platformlar
 

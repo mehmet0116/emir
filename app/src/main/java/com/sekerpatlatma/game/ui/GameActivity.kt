@@ -20,6 +20,7 @@ import com.sekerpatlatma.game.R
 import com.sekerpatlatma.game.audio.SoundManager
 import com.sekerpatlatma.game.engine.GameEngine
 import com.sekerpatlatma.game.model.Level
+import com.sekerpatlatma.game.model.SpecialType
 import com.sekerpatlatma.game.view.GameBoardView
 
 class GameActivity : AppCompatActivity() {
@@ -154,6 +155,21 @@ class GameActivity : AppCompatActivity() {
             onNoValidMoves = {
                 runOnUiThread {
                     showShuffleNotice()
+                }
+            },
+            onSpecialCreated = { row, col, specialType ->
+                runOnUiThread {
+                    // Özel şeker oluşturulduğunda animasyon göster
+                    gameBoardView.animateSpecialCandyCreation(row, col, specialType)
+                    if (prefs.soundEnabled) {
+                        soundManager.playSound(SoundManager.SoundType.STAR)
+                    }
+                }
+            },
+            onBombExplosion = { positions, specialType ->
+                runOnUiThread {
+                    // Bomba patlaması efekti
+                    gameBoardView.spawnBombExplosion(positions, specialType)
                 }
             }
         )
