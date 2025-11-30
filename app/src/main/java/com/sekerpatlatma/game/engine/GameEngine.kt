@@ -229,8 +229,12 @@ class GameEngine(
         }
         
         // Combo multiplier
-        val comboMultiplier = 1.5f
-        score = (score * Math.pow(comboMultiplier.toDouble(), (gameState.comboCount - 1).toDouble())).toInt()
+        val comboMultiplier = 1.5
+        var multipliedScore = score.toDouble()
+        repeat(gameState.comboCount - 1) {
+            multipliedScore *= comboMultiplier
+        }
+        score = multipliedScore.toInt()
         
         gameState.score += score
         onScoreChanged(gameState.score)

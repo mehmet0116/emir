@@ -42,15 +42,6 @@ class GameBoardView @JvmOverloads constructor(
         strokeWidth = 3f
     }
     
-    private val cellPaints = mapOf(
-        CandyType.RED to createCandyPaint("#FF5252", "#D32F2F"),
-        CandyType.BLUE to createCandyPaint("#00B0FF", "#0091EA"),
-        CandyType.GREEN to createCandyPaint("#00E676", "#00C853"),
-        CandyType.YELLOW to createCandyPaint("#FFEA00", "#FFC400"),
-        CandyType.PURPLE to createCandyPaint("#E040FB", "#AA00FF"),
-        CandyType.ORANGE to createCandyPaint("#FF9100", "#FF6D00")
-    )
-    
     private val selectedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         style = Paint.Style.STROKE
@@ -73,7 +64,16 @@ class GameBoardView @JvmOverloads constructor(
     
     private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#40000000")
-        maskFilter = BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL)
+    }
+    
+    private var blurMaskFilter: BlurMaskFilter? = null
+    
+    private fun getShadowPaintWithBlur(): Paint {
+        if (blurMaskFilter == null) {
+            blurMaskFilter = BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL)
+        }
+        shadowPaint.maskFilter = blurMaskFilter
+        return shadowPaint
     }
     
     // Animation properties
@@ -85,12 +85,6 @@ class GameBoardView @JvmOverloads constructor(
         var offsetY: Float = 0f,
         var rotation: Float = 0f
     )
-
-    private fun createCandyPaint(startColor: String, endColor: String): Paint {
-        return Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-        }
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -137,7 +131,7 @@ class GameBoardView @JvmOverloads constructor(
                     x + 4f, y + 6f,
                     x + cellSize - 4f, y + cellSize,
                     14f, 14f,
-                    shadowPaint
+                    getShadowPaintWithBlur()
                 )
                 
                 // Draw candy background with gradient

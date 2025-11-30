@@ -41,6 +41,9 @@ class GameActivity : AppCompatActivity() {
     private var currentLevel: Level? = null
     private val handler = Handler(Looper.getMainLooper())
     private val levels = Level.generateLevels()
+    
+    // Track which stars have been earned to avoid duplicate sounds
+    private var starsEarned = mutableSetOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -195,29 +198,29 @@ class GameActivity : AppCompatActivity() {
         currentLevel?.let { level ->
             val score = gameEngine.state.score
             
-            if (score >= level.starThresholds[0]) {
+            if (score >= level.starThresholds[0] && !starsEarned.contains(1)) {
                 star1.alpha = 1f
-                if (prefs.soundEnabled && star1.tag != "earned") {
+                if (prefs.soundEnabled) {
                     soundManager.playSound(SoundManager.SoundType.STAR)
                     animateStar(star1)
-                    star1.tag = "earned"
                 }
+                starsEarned.add(1)
             }
-            if (score >= level.starThresholds[1]) {
+            if (score >= level.starThresholds[1] && !starsEarned.contains(2)) {
                 star2.alpha = 1f
-                if (prefs.soundEnabled && star2.tag != "earned") {
+                if (prefs.soundEnabled) {
                     soundManager.playSound(SoundManager.SoundType.STAR)
                     animateStar(star2)
-                    star2.tag = "earned"
                 }
+                starsEarned.add(2)
             }
-            if (score >= level.starThresholds[2]) {
+            if (score >= level.starThresholds[2] && !starsEarned.contains(3)) {
                 star3.alpha = 1f
-                if (prefs.soundEnabled && star3.tag != "earned") {
+                if (prefs.soundEnabled) {
                     soundManager.playSound(SoundManager.SoundType.STAR)
                     animateStar(star3)
-                    star3.tag = "earned"
                 }
+                starsEarned.add(3)
             }
         }
     }
@@ -226,9 +229,7 @@ class GameActivity : AppCompatActivity() {
         star1.alpha = 0.3f
         star2.alpha = 0.3f
         star3.alpha = 0.3f
-        star1.tag = null
-        star2.tag = null
-        star3.tag = null
+        starsEarned.clear()
     }
 
     private fun animateStar(view: View) {
