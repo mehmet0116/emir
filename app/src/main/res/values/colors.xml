@@ -23,6 +23,10 @@
     <color name="bg_darker">#16213E</color>
     <color name="bg_darkest">#0F3460</color>
     
+    <!-- Gradient Colors -->
+    <color name="gradient_start">@color/candy_pink</color>
+    <color name="gradient_end">@color/candy_purple</color>
+    
     <!-- UI Colors -->
     <color name="accent_gold">#FFD700</color>
     <color name="success">#00E676</color>
