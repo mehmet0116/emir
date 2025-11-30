@@ -93,6 +93,69 @@ Profesyonel seviye sistemi ve akıcı oyun mekaniği ile hazırlanmış eğlence
 
 Oyun, mobil ve masaüstü cihazlarda mükemmel görünüm için tasarlanmıştır.
 
+## 🚀 GitHub'a Proje Yükleme
+
+Yerel Android projenizi GitHub repository'sine yüklemek için aşağıdaki adımları takip edin:
+
+### Ön Koşullar
+- [Git](https://git-scm.com/downloads) yüklü olmalı
+- GitHub hesabınız olmalı
+- Proje klasörünüz hazır olmalı
+
+### Adım Adım Talimatlar
+
+1. **Terminal/Command Prompt açın** ve proje klasörüne gidin:
+   ```bash
+   # Windows için:
+   cd C:\path\to\your\project
+   
+   # macOS/Linux için:
+   cd /path/to/your/project
+   ```
+
+2. **Git repository'si başlatın** (eğer henüz başlatılmadıysa):
+   ```bash
+   git init
+   ```
+
+3. **Tüm dosyaları staging alanına ekleyin**:
+   ```bash
+   git add .
+   ```
+
+4. **İlk commit'i yapın**:
+   ```bash
+   git commit -m "Initial commit: Android projesi eklendi"
+   ```
+
+5. **GitHub repository'sini remote olarak ekleyin**:
+   ```bash
+   # your-username ve your-repo-name kısımlarını kendi bilgilerinizle değiştirin
+   git remote add origin https://github.com/your-username/your-repo-name.git
+   ```
+
+6. **Kodu GitHub'a gönderin**:
+   ```bash
+   git branch -M main
+   git push -u origin main
+   ```
+
+### ⚠️ Önemli Notlar
+
+- `.gitignore` dosyası gereksiz dosyaları (build/, .gradle/, local.properties vb.) otomatik olarak hariç tutar
+- `local.properties` dosyası SDK yolunuzu içerdiği için yüklenmez - bu normaldir
+- Build dosyaları (`.gradle/`, `build/`) yüklenmez - Android Studio bunları otomatik oluşturur
+
+### Sorun Giderme
+
+**Proje derlenmiyor mu?**
+1. Android Studio'da `File > Sync Project with Gradle Files` yapın
+2. `Build > Clean Project` ardından `Build > Rebuild Project` yapın
+3. SDK sürümünüzün projedeki ile uyumlu olduğundan emin olun
+
+**Dosyalar eksik mi görünüyor?**
+`.gitignore` dosyasından dolayı bazı dosyalar (build artifacts, IDE dosyaları) yüklenmez. Bu beklenen bir durumdur ve proje yine de çalışır.
+
 ## 📝 Lisans
 
 Bu proje açık kaynaklıdır ve serbestçe kullanılabilir.
