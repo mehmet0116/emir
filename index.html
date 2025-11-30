@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🍬 Şeker Patlatma Oyunu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Ana Menü Ekranı -->
+    <div id="main-menu" class="screen active">
+        <div class="menu-container">
+            <div class="game-logo">
+                <h1>🍬 Şeker Patlatma 🍬</h1>
+                <p class="subtitle">Eğlenceli Maceraya Hazır mısın?</p>
+            </div>
+            <div class="menu-buttons">
+                <button id="play-btn" class="menu-btn primary-btn">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">Oyna</span>
+                </button>
+                <button id="levels-btn" class="menu-btn secondary-btn">
+                    <span class="btn-icon">🎯</span>
+                    <span class="btn-text">Seviyeler</span>
+                </button>
+                <button id="settings-btn" class="menu-btn secondary-btn">
+                    <span class="btn-icon">⚙️</span>
+                    <span class="btn-text">Ayarlar</span>
+                </button>
+            </div>
+            <div class="player-stats">
+                <div class="stat-item">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-value" id="total-stars">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🏆</span>
+                    <span class="stat-value" id="current-level-display">1</span>
+                </div>
+            </div>
+        </div>
+        <div class="floating-candies"></div>
+    </div>
+
+    <!-- Seviye Seçim Ekranı -->
+    <div id="level-select" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" id="back-to-menu">←</button>
+            <h2>Seviye Seç</h2>
+            <div class="header-stats">
+                <span class="stat-icon">⭐</span>
+                <span id="level-select-stars">0</span>
+            </div>
+        </div>
+        <div class="levels-container" id="levels-grid">
+            <!-- Seviyeler JavaScript ile oluşturulacak -->
+        </div>
+    </div>
+
+    <!-- Oyun Ekranı -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <button class="back-btn" id="back-from-game">←</button>
+            <div class="level-info">
+                <span class="level-badge">Seviye <span id="current-level">1</span></span>
+            </div>
+            <div class="game-stats">
+                <div class="stat moves">
+                    <span class="stat-label">Hamle</span>
+                    <span class="stat-value" id="moves-left">30</span>
+                </div>
+                <div class="stat score">
+                    <span class="stat-label">Puan</span>
+                    <span class="stat-value" id="current-score">0</span>
+                </div>
+                <div class="stat target">
+                    <span class="stat-label">Hedef</span>
+                    <span class="stat-value" id="target-score">1000</span>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="score-progress"></div>
+            <div class="star-markers">
+                <div class="star-marker" data-star="1">⭐</div>
+                <div class="star-marker" data-star="2">⭐</div>
+                <div class="star-marker" data-star="3">⭐</div>
+            </div>
+        </div>
+        <div class="game-board-container">
+            <div id="game-board" class="game-board">
+                <!-- Oyun tahtası JavaScript ile oluşturulacak -->
+            </div>
+        </div>
+        <div class="game-controls">
+            <button id="hint-btn" class="control-btn">💡 İpucu</button>
+            <button id="shuffle-btn" class="control-btn">🔄 Karıştır</button>
+        </div>
+    </div>
+
+    <!-- Seviye Başarı Ekranı -->
+    <div id="level-complete" class="screen overlay">
+        <div class="popup-container celebration">
+            <div class="confetti-container"></div>
+            <div class="popup-content">
+                <h2 class="celebration-title">🎉 TEBRİKLER! 🎉</h2>
+                <div class="stars-earned">
+                    <span class="star earned" id="star-1">⭐</span>
+                    <span class="star earned" id="star-2">⭐</span>
+                    <span class="star earned" id="star-3">⭐</span>
+                </div>
+                <div class="score-display">
+                    <p>Puanınız</p>
+                    <h3 id="final-score">0</h3>
+                </div>
+                <div class="bonus-display" id="bonus-section">
+                    <p class="bonus-text">🎁 BONUS KAZANDINIZ! 🎁</p>
+                    <span class="bonus-amount" id="bonus-amount">+500</span>
+                </div>
+                <div class="popup-buttons">
+                    <button id="next-level-btn" class="popup-btn primary-btn">
+                        Sonraki Seviye ➡️
+                    </button>
+                    <button id="replay-btn" class="popup-btn secondary-btn">
+                        🔄 Tekrar Oyna
+                    </button>
+                    <button id="menu-btn" class="popup-btn secondary-btn">
+                        🏠 Ana Menü
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seviye Başarısız Ekranı -->
+    <div id="level-failed" class="screen overlay">
+        <div class="popup-container failed">
+            <div class="popup-content">
+                <h2 class="failed-title">😢 Hamle Bitti!</h2>
+                <p class="failed-message">Üzülme, tekrar deneyebilirsin!</p>
+                <div class="score-display">
+                    <p>Puanınız</p>
+                    <h3 id="failed-score">0</h3>
+                </div>
+                <div class="popup-buttons">
+                    <button id="retry-btn" class="popup-btn primary-btn">
+                        🔄 Tekrar Dene
+                    </button>
+                    <button id="failed-menu-btn" class="popup-btn secondary-btn">
+                        🏠 Ana Menü
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ayarlar Ekranı -->
+    <div id="settings-screen" class="screen overlay">
+        <div class="popup-container settings">
+            <div class="popup-content">
+                <h2>⚙️ Ayarlar</h2>
+                <div class="settings-options">
+                    <div class="setting-item">
+                        <span class="setting-label">🔊 Ses Efektleri</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sound-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">🎵 Müzik</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="music-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">✨ Animasyonlar</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="animation-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <button id="close-settings" class="popup-btn primary-btn">
+                    ✓ Tamam
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yeni Seviye Açıldı Popup -->
+    <div id="new-level-unlock" class="screen overlay">
+        <div class="popup-container unlock">
+            <div class="popup-content">
+                <div class="unlock-animation">
+                    <span class="unlock-icon">🔓</span>
+                </div>
+                <h2 class="unlock-title">YENİ SEVİYE AÇILDI!</h2>
+                <p class="unlock-level">Seviye <span id="unlocked-level">2</span></p>
+                <p class="unlock-message">Yeni zorluklar seni bekliyor!</p>
+                <button id="continue-btn" class="popup-btn primary-btn">
+                    Devam Et ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,1 +1,69 @@
-# emir
+# 🍬 Şeker Patlatma Oyunu
+
+Profesyonel seviye sistemi ve akıcı oyun mekaniği ile hazırlanmış eğlenceli bir şeker patlatma oyunu!
+
+## 🎮 Özellikler
+
+- **50 Farklı Seviye**: Her biri benzersiz zorluk ve hedeflerle
+- **Akıcı Animasyonlar**: Profesyonel görsel efektler ve geçişler
+- **Yıldız Sistemi**: Her seviyede 3 yıldıza kadar kazanın
+- **Kombo Sistemi**: Ardışık eşleşmelerle puan çarpanı
+- **Özel Şekerler**: Çizgili, paketli ve renk bombası şekerleri
+- **İpucu Sistemi**: Sıkıştığınızda yardım alın
+- **Karıştırma**: Geçerli hamle kalmadığında tahtayı karıştırın
+- **Mobil Uyumlu**: Dokunmatik ekranlar için optimize edilmiş
+
+## 🚀 Nasıl Oynanır
+
+1. Oyunu başlatmak için **Oyna** butonuna tıklayın
+2. İki komşu şekeri değiştirmek için sırayla tıklayın
+3. 3 veya daha fazla aynı şekeri eşleştirin
+4. Hedef puana ulaşarak seviyeyi tamamlayın
+5. Daha fazla yıldız kazanmak için daha yüksek puanlar yapın
+
+## 📱 Teknolojiler
+
+- HTML5
+- CSS3 (Animasyonlar ve Flexbox/Grid)
+- Vanilla JavaScript (ES6+)
+- Web Audio API (Ses efektleri)
+- LocalStorage (İlerleme kaydetme)
+
+## 🎯 Seviye Sistemi
+
+- **Hedef Puan**: Her seviyede belirli bir puana ulaşmanız gerekir
+- **Hamle Limiti**: Sınırlı hamle ile hedefe ulaşın
+- **Yıldız Eşikleri**: 
+  - ⭐ 1 Yıldız: Minimum hedef puan
+  - ⭐⭐ 2 Yıldız: Orta seviye puan
+  - ⭐⭐⭐ 3 Yıldız: Maksimum puan
+
+## 💡 İpuçları
+
+- Kombo yapmak için birden fazla eşleşme planlayın
+- 4'lü ve 5'li eşleşmeler bonus puan verir
+- Kalan hamlelerin her biri bonus puana dönüşür
+- 3 yıldız için maksimum skoru hedefleyin
+
+## 📂 Dosya Yapısı
+
+```
+├── index.html      # Ana HTML dosyası
+├── css/
+│   └── style.css   # Tüm stiller
+├── js/
+│   └── game.js     # Oyun mantığı
+└── README.md       # Bu dosya
+```
+
+## 🎨 Ekran Görüntüleri
+
+Oyun, mobil ve masaüstü cihazlarda mükemmel görünüm için tasarlanmıştır.
+
+## 📝 Lisans
+
+Bu proje açık kaynaklıdır ve serbestçe kullanılabilir.
+
+---
+
+🍬 İyi eğlenceler! 🍬
