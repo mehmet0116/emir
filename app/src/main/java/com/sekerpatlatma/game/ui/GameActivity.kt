@@ -87,6 +87,19 @@ class GameActivity : AppCompatActivity() {
         gameBoardView.setOnCandyClickListener { row, col ->
             onCandyClicked(row, col)
         }
+        
+        gameBoardView.setOnCandySwipeListener { row1, col1, row2, col2 ->
+            onCandySwiped(row1, col1, row2, col2)
+        }
+    }
+    
+    private fun onCandySwiped(row1: Int, col1: Int, row2: Int, col2: Int) {
+        val success = gameEngine.swapCandies(row1, col1, row2, col2)
+        if (!success) {
+            if (prefs.soundEnabled) {
+                soundManager.playSound(SoundManager.SoundType.INVALID)
+            }
+        }
     }
 
     private fun setupGameEngine() {
