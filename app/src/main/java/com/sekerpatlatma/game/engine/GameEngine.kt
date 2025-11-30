@@ -88,13 +88,27 @@ class GameEngine(
     private fun isAdjacent(row1: Int, col1: Int, row2: Int, col2: Int): Boolean {
         return abs(row1 - row2) + abs(col1 - col2) == 1
     }
+    
+    // Direct swap method for swipe gestures
+    fun swapCandies(row1: Int, col1: Int, row2: Int, col2: Int): Boolean {
+        if (gameState.isAnimating) return false
+        if (!isAdjacent(row1, col1, row2, col2)) return false
+        
+        // Clear any selection
+        gameState.selectedCandy?.let { (selRow, selCol) ->
+            board[selRow][selCol]?.isSelected = false
+        }
+        gameState.selectedCandy = null
+        
+        return trySwap(row1, col1, row2, col2)
+    }
 
     private fun trySwap(row1: Int, col1: Int, row2: Int, col2: Int): Boolean {
         gameState.selectedCandy = null
         gameState.isAnimating = true
         
         // Perform swap
-        swapCandies(row1, col1, row2, col2)
+        performSwap(row1, col1, row2, col2)
         
         val matches = findAllMatches()
         if (matches.isNotEmpty()) {
@@ -106,14 +120,14 @@ class GameEngine(
             return true
         } else {
             // Invalid move - swap back
-            swapCandies(row1, col1, row2, col2)
+            performSwap(row1, col1, row2, col2)
             gameState.isAnimating = false
             onBoardChanged()
             return false
         }
     }
 
-    private fun swapCandies(row1: Int, col1: Int, row2: Int, col2: Int) {
+    private fun performSwap(row1: Int, col1: Int, row2: Int, col2: Int) {
         val temp = board[row1][col1]
         board[row1][col1] = board[row2][col2]
         board[row2][col2] = temp
@@ -324,22 +338,22 @@ class GameEngine(
             for (col in 0 until boardSize) {
                 // Check right swap
                 if (col < boardSize - 1) {
-                    swapCandies(row, col, row, col + 1)
+                    performSwap(row, col, row, col + 1)
                     if (findAllMatches().isNotEmpty()) {
-                        swapCandies(row, col, row, col + 1)
+                        performSwap(row, col, row, col + 1)
                         return true
                     }
-                    swapCandies(row, col, row, col + 1)
+                    performSwap(row, col, row, col + 1)
                 }
                 
                 // Check down swap
                 if (row < boardSize - 1) {
-                    swapCandies(row, col, row + 1, col)
+                    performSwap(row, col, row + 1, col)
                     if (findAllMatches().isNotEmpty()) {
-                        swapCandies(row, col, row + 1, col)
+                        performSwap(row, col, row + 1, col)
                         return true
                     }
-                    swapCandies(row, col, row + 1, col)
+                    performSwap(row, col, row + 1, col)
                 }
             }
         }
@@ -386,28 +400,28 @@ class GameEngine(
             for (col in 0 until boardSize) {
                 // Check right swap
                 if (col < boardSize - 1) {
-                    swapCandies(row, col, row, col + 1)
+                    performSwap(row, col, row, col + 1)
                     if (findAllMatches().isNotEmpty()) {
-                        swapCandies(row, col, row, col + 1)
+                        performSwap(row, col, row, col + 1)
                         board[row][col]?.isHint = true
                         board[row][col + 1]?.isHint = true
                         onBoardChanged()
                         return Pair(Pair(row, col), Pair(row, col + 1))
                     }
-                    swapCandies(row, col, row, col + 1)
+                    performSwap(row, col, row, col + 1)
                 }
                 
                 // Check down swap
                 if (row < boardSize - 1) {
-                    swapCandies(row, col, row + 1, col)
+                    performSwap(row, col, row + 1, col)
                     if (findAllMatches().isNotEmpty()) {
-                        swapCandies(row, col, row + 1, col)
+                        performSwap(row, col, row + 1, col)
                         board[row][col]?.isHint = true
                         board[row + 1][col]?.isHint = true
                         onBoardChanged()
                         return Pair(Pair(row, col), Pair(row + 1, col))
                     }
-                    swapCandies(row, col, row + 1, col)
+                    performSwap(row, col, row + 1, col)
                 }
             }
         }
