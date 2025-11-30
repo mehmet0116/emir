@@ -1127,15 +1127,36 @@ function createConfetti() {
     const container = document.querySelector('.confetti-container');
     container.innerHTML = '';
     
-    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A29BFE', '#FF7F50', '#96E6A1'];
+    const colors = ['#FF3CAC', '#00E5FF', '#FFEB3B', '#00E676', '#784BA0', '#FF6D00', '#E040FB'];
+    const shapes = ['square', 'circle', 'triangle'];
     
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 80; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
-        confetti.style.left = `${Math.random() * 100}%`;
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = `${Math.random() * 2}s`;
-        confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const size = 8 + Math.random() * 8;
+        
+        let borderRadius = '2px';
+        let transform = '';
+        if (shape === 'circle') {
+            borderRadius = '50%';
+        } else if (shape === 'triangle') {
+            borderRadius = '0';
+            transform = 'rotate(45deg)';
+        }
+        
+        confetti.style.cssText = `
+            left: ${Math.random() * 100}%;
+            width: ${size}px;
+            height: ${size}px;
+            background: ${color};
+            border-radius: ${borderRadius};
+            transform: ${transform};
+            animation-delay: ${Math.random() * 2.5}s;
+            animation-duration: ${2.5 + Math.random() * 2}s;
+            box-shadow: 0 0 ${5 + Math.random() * 10}px ${color};
+        `;
         
         container.appendChild(confetti);
     }
@@ -1143,35 +1164,50 @@ function createConfetti() {
 
 function createFloatingCandies() {
     const container = document.querySelector('.floating-candies');
-    const emojis = ['🍬', '🍭', '🍫', '🍩', '🧁', '🍪', '⭐', '💎'];
+    const emojis = ['🍬', '🍭', '🌟', '💫', '✨', '💎', '🔮', '🎀'];
+    const colors = ['#FF3CAC', '#784BA0', '#00E5FF', '#00E676', '#FFEB3B', '#FF6D00'];
     
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 25; i++) {
         const candy = document.createElement('div');
         candy.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        candy.style.position = 'absolute';
-        candy.style.fontSize = `${20 + Math.random() * 30}px`;
-        candy.style.left = `${Math.random() * 100}%`;
-        candy.style.top = `${Math.random() * 100}%`;
-        candy.style.opacity = '0.3';
-        candy.style.animation = `float ${5 + Math.random() * 5}s ease-in-out infinite`;
-        candy.style.animationDelay = `${Math.random() * 5}s`;
+        candy.style.cssText = `
+            position: absolute;
+            font-size: ${18 + Math.random() * 28}px;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            opacity: ${0.15 + Math.random() * 0.25};
+            filter: blur(${Math.random() * 2}px) drop-shadow(0 0 ${5 + Math.random() * 10}px ${colors[Math.floor(Math.random() * colors.length)]});
+            animation: modernFloat ${8 + Math.random() * 8}s ease-in-out infinite;
+            animation-delay: ${Math.random() * 5}s;
+            pointer-events: none;
+        `;
         
         container.appendChild(candy);
     }
     
-    // Float animasyonu ekle
+    // Modern float animasyonu ekle
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
+        @keyframes modernFloat {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) rotate(0deg) scale(1); 
+            }
+            25% { 
+                transform: translateY(-25px) translateX(10px) rotate(5deg) scale(1.05); 
+            }
+            50% { 
+                transform: translateY(-15px) translateX(-10px) rotate(-3deg) scale(0.95); 
+            }
+            75% { 
+                transform: translateY(-30px) translateX(5px) rotate(8deg) scale(1.02); 
+            }
         }
     `;
     document.head.appendChild(style);
 }
 
 // ==========================================
-// SES EFEKTLERİ
+// SES EFEKTLERİ - Modern Musical Sounds
 // ==========================================
 function getAudioContext() {
     if (!audioContext) {
@@ -1180,41 +1216,267 @@ function getAudioContext() {
     return audioContext;
 }
 
+// Musical note frequencies
+const NOTES = {
+    C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00,
+    A4: 440.00, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25,
+    F5: 698.46, G5: 783.99, A5: 880.00
+};
+
 function playSound(type) {
     if (!gameState.settings.sound) return;
     
     try {
         const ctx = getAudioContext();
-        const oscillator = ctx.createOscillator();
-        const gainNode = ctx.createGain();
         
-        oscillator.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        
-        const sounds = {
-            select: { freq: 400, duration: 0.1 },
-            match: { freq: 600, duration: 0.2 },
-            invalid: { freq: 200, duration: 0.3 },
-            star: { freq: 800, duration: 0.3 },
-            win: { freq: 1000, duration: 0.5 },
-            lose: { freq: 150, duration: 0.5 },
-            hint: { freq: 500, duration: 0.2 },
-            shuffle: { freq: 350, duration: 0.4 }
-        };
-        
-        const sound = sounds[type] || sounds.select;
-        
-        oscillator.frequency.value = sound.freq;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + sound.duration);
-        
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + sound.duration);
+        switch(type) {
+            case 'select':
+                playModernSelect(ctx);
+                break;
+            case 'match':
+                playModernMatch(ctx);
+                break;
+            case 'invalid':
+                playModernInvalid(ctx);
+                break;
+            case 'star':
+                playModernStar(ctx);
+                break;
+            case 'win':
+                playModernWin(ctx);
+                break;
+            case 'lose':
+                playModernLose(ctx);
+                break;
+            case 'hint':
+                playModernHint(ctx);
+                break;
+            case 'shuffle':
+                playModernShuffle(ctx);
+                break;
+            default:
+                playModernSelect(ctx);
+        }
     } catch (e) {
         // Ses oynatılamadı, sessizce devam et
     }
+}
+
+// Modern soft click sound
+function playModernSelect(ctx) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.frequency.setValueAtTime(NOTES.E5, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(NOTES.G5, ctx.currentTime + 0.05);
+    osc.type = 'sine';
+    
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.12);
+}
+
+// Pleasant match chord sound
+function playModernMatch(ctx) {
+    const notes = [NOTES.C5, NOTES.E5, NOTES.G5];
+    
+    notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 3000;
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        
+        const startTime = ctx.currentTime + (i * 0.03);
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.12, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.25);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 0.25);
+    });
+}
+
+// Gentle error sound
+function playModernInvalid(ctx) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    
+    filter.type = 'lowpass';
+    filter.frequency.value = 800;
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.frequency.setValueAtTime(NOTES.E4, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(NOTES.C4, ctx.currentTime + 0.15);
+    osc.type = 'triangle';
+    
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+}
+
+// Magical star sound
+function playModernStar(ctx) {
+    const notes = [NOTES.C5, NOTES.E5, NOTES.G5, NOTES.C5 * 2];
+    
+    notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        
+        const startTime = ctx.currentTime + (i * 0.08);
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.35);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 0.35);
+    });
+}
+
+// Victory fanfare
+function playModernWin(ctx) {
+    const melody = [
+        { note: NOTES.C5, time: 0, dur: 0.15 },
+        { note: NOTES.E5, time: 0.1, dur: 0.15 },
+        { note: NOTES.G5, time: 0.2, dur: 0.15 },
+        { note: NOTES.C5 * 2, time: 0.35, dur: 0.4 }
+    ];
+    
+    melody.forEach(({ note, time, dur }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 4000;
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.value = note;
+        osc.type = 'sine';
+        
+        const startTime = ctx.currentTime + time;
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02);
+        gain.gain.setValueAtTime(0.15, startTime + dur * 0.7);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + dur);
+        
+        osc.start(startTime);
+        osc.stop(startTime + dur);
+    });
+}
+
+// Gentle lose sound
+function playModernLose(ctx) {
+    const notes = [NOTES.E4, NOTES.D4, NOTES.C4];
+    
+    notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 1000;
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.value = freq;
+        osc.type = 'triangle';
+        
+        const startTime = ctx.currentTime + (i * 0.2);
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.1, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.35);
+        
+        osc.start(startTime);
+        osc.stop(startTime + 0.35);
+    });
+}
+
+// Bright hint sound
+function playModernHint(ctx) {
+    const osc = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.frequency.value = NOTES.G5;
+    osc2.frequency.value = NOTES.E5;
+    osc.type = 'sine';
+    osc2.type = 'sine';
+    
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    
+    osc.start(ctx.currentTime);
+    osc2.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+    osc2.stop(ctx.currentTime + 0.3);
+}
+
+// Whoosh shuffle sound
+function playModernShuffle(ctx) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(200, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(2000, ctx.currentTime + 0.3);
+    filter.Q.value = 2;
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.15);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
+    
+    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
 }
 
 // ==========================================
