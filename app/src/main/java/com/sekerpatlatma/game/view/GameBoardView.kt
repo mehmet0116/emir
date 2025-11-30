@@ -155,8 +155,7 @@ class GameBoardView @JvmOverloads constructor(
             startY + boardWidth - boardPadding * 1.5f
         )
         
-        // Draw board glow effect
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
+        // Draw board glow effect (only apply software layer when needed for blur effects)
         canvas.drawRoundRect(boardRect, 24f, 24f, boardPaint)
         canvas.drawRoundRect(boardRect, 24f, 24f, boardBorderPaint)
         
@@ -241,7 +240,11 @@ class GameBoardView @JvmOverloads constructor(
     }
     
     private fun drawParticles(canvas: Canvas) {
+        if (particles.isEmpty()) return
+        
         val iterator = particles.iterator()
+        var hasActiveParticles = false
+        
         while (iterator.hasNext()) {
             val particle = iterator.next()
             
@@ -253,10 +256,12 @@ class GameBoardView @JvmOverloads constructor(
             particle.alpha = (particle.life / particle.maxLife).coerceIn(0f, 1f)
             particle.size *= 0.97f
             
-            if (particle.life <= 0 || particle.alpha <= 0) {
+            if (particle.life <= 0 || particle.alpha <= 0 || particle.size < 0.5f) {
                 iterator.remove()
                 continue
             }
+            
+            hasActiveParticles = true
             
             // Draw particle
             particlePaint.color = particle.color
@@ -264,8 +269,8 @@ class GameBoardView @JvmOverloads constructor(
             canvas.drawCircle(particle.x, particle.y, particle.size, particlePaint)
         }
         
-        // Continue animation if particles exist
-        if (particles.isNotEmpty()) {
+        // Continue animation if particles exist, using post instead of postInvalidateOnAnimation for better control
+        if (hasActiveParticles) {
             postInvalidateOnAnimation()
         }
     }

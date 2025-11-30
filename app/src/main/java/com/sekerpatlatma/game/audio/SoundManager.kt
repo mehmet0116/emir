@@ -185,7 +185,7 @@ class SoundManager(context: Context) {
         playShortArraySound(samples, sampleRate)
     }
 
-    private fun playShortArraySound(samples: ShortArray, sampleRate: Int) {
+    private suspend fun playShortArraySound(samples: ShortArray, sampleRate: Int) {
         try {
             val minBufferSize = AudioTrack.getMinBufferSize(
                 sampleRate,
@@ -214,11 +214,16 @@ class SoundManager(context: Context) {
             audioTrack.write(samples, 0, samples.size)
             audioTrack.play()
 
-            Thread.sleep((samples.size * 1000L / sampleRate) + 50)
+            // Use delay for coroutines
+            kotlinx.coroutines.delay((samples.size * 1000L / sampleRate) + 50)
             audioTrack.stop()
             audioTrack.release()
+        } catch (e: IllegalStateException) {
+            android.util.Log.w("SoundManager", "AudioTrack state error: ${e.message}")
+        } catch (e: IllegalArgumentException) {
+            android.util.Log.w("SoundManager", "AudioTrack argument error: ${e.message}")
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("SoundManager", "Unexpected audio error", e)
         }
     }
 
