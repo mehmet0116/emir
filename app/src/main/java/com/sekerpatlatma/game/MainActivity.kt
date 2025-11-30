@@ -1,93 +1,86 @@
 package com.sekerpatlatma.game
 
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.ProgressBar
-import androidx.activity.OnBackPressedCallback
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.sekerpatlatma.game.ui.GameActivity
+import com.sekerpatlatma.game.ui.LevelSelectActivity
+import com.sekerpatlatma.game.ui.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var webView: WebView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var prefs: GamePreferences
+    private lateinit var tvTotalStars: TextView
+    private lateinit var tvCurrentLevel: TextView
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Tam ekran modu
         hideSystemUI()
-        
         setContentView(R.layout.activity_main)
 
-        webView = findViewById(R.id.webView)
-        progressBar = findViewById(R.id.progressBar)
-
-        setupWebView()
-        setupBackPressedHandler()
+        prefs = GamePreferences(this)
         
-        // Oyunu yükle
-        webView.loadUrl("file:///android_asset/index.html")
+        setupViews()
+        setupClickListeners()
+        animateElements()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            builtInZoomControls = false
-            displayZoomControls = false
-            setSupportZoom(false)
-            cacheMode = WebSettings.LOAD_DEFAULT
-            mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                progressBar.visibility = View.GONE
-            }
-        }
-
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                progressBar.progress = newProgress
-                if (newProgress == 100) {
-                    progressBar.visibility = View.GONE
-                }
-            }
-        }
-
-        // JavaScript interface ekle
-        webView.addJavascriptInterface(WebAppInterface(this), "Android")
+    private fun setupViews() {
+        tvTotalStars = findViewById(R.id.tvTotalStars)
+        tvCurrentLevel = findViewById(R.id.tvCurrentLevel)
+        
+        updateStats()
     }
 
-    private fun setupBackPressedHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
-            }
-        })
+    private fun updateStats() {
+        tvTotalStars.text = prefs.totalStars.toString()
+        tvCurrentLevel.text = prefs.maxUnlockedLevel.toString()
+    }
+
+    private fun setupClickListeners() {
+        findViewById<Button>(R.id.btnPlay).setOnClickListener {
+            startGame(prefs.maxUnlockedLevel)
+        }
+
+        findViewById<Button>(R.id.btnLevels).setOnClickListener {
+            startActivity(Intent(this, LevelSelectActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+    }
+
+    private fun startGame(level: Int) {
+        val intent = Intent(this, GameActivity::class.java)
+        intent.putExtra("level", level)
+        startActivity(intent)
+    }
+
+    private fun animateElements() {
+        val fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
+        fadeIn.duration = 500
+
+        findViewById<View>(R.id.logoContainer).startAnimation(fadeIn)
+        
+        val slideUp = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left)
+        slideUp.duration = 600
+        slideUp.startOffset = 200
+        
+        findViewById<View>(R.id.buttonsContainer).startAnimation(slideUp)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStats()
     }
 
     private fun hideSystemUI() {
@@ -97,20 +90,5 @@ class MainActivity : AppCompatActivity() {
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        webView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        webView.onPause()
-    }
-
-    override fun onDestroy() {
-        webView.destroy()
-        super.onDestroy()
     }
 }
