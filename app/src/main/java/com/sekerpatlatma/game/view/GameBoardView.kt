@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.sekerpatlatma.game.R
 import com.sekerpatlatma.game.model.Candy
 import com.sekerpatlatma.game.model.CandyType
+import com.sekerpatlatma.game.model.SpecialType
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -46,6 +47,14 @@ class GameBoardView @JvmOverloads constructor(
     private val particles = mutableListOf<Particle>()
     private val particlePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     
+    enum class ParticleType {
+        NORMAL,      // Normal patlama parçacığı
+        SPARKLE,     // Işıltı
+        BOMB_WAVE,   // Bomba dalgası
+        STREAK,      // Çizgi efekti
+        STAR         // Yıldız
+    }
+    
     data class Particle(
         var x: Float,
         var y: Float,
@@ -56,7 +65,8 @@ class GameBoardView @JvmOverloads constructor(
         var alpha: Float,
         var life: Float,
         var maxLife: Float,
-        var gravity: Float = 0.5f
+        var gravity: Float = 0.5f,
+        var particleType: ParticleType = ParticleType.NORMAL
     )
     
     // Paints
@@ -95,6 +105,16 @@ class GameBoardView @JvmOverloads constructor(
         color = Color.parseColor("#40000000")
     }
     
+    // Özel şeker efektleri için paintler
+    private val specialPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+    }
+    
+    private val bombGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+    }
+    
     // Glow paint for enhanced visuals
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -102,6 +122,9 @@ class GameBoardView @JvmOverloads constructor(
     
     private var blurMaskFilter: BlurMaskFilter? = null
     private var glowBlurFilter: BlurMaskFilter? = null
+    
+    // Özel şeker pulsasyon animasyonu
+    private var specialPulsePhase = 0f
     
     private fun getShadowPaintWithBlur(): Paint {
         if (blurMaskFilter == null) {
@@ -143,6 +166,12 @@ class GameBoardView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         
+        // Özel şeker animasyonunu güncelle
+        specialPulsePhase += 0.1f
+        if (specialPulsePhase > 2 * Math.PI) {
+            specialPulsePhase = 0f
+        }
+        
         val boardWidth = cellSize * boardSize + cellGap * (boardSize - 1) + boardPadding * 2
         val startX = (width - boardWidth) / 2 + boardPadding
         val startY = (height - boardWidth) / 2 + boardPadding
@@ -160,9 +189,13 @@ class GameBoardView @JvmOverloads constructor(
         canvas.drawRoundRect(boardRect, 24f, 24f, boardBorderPaint)
         
         // Draw candies
+        var hasSpecialCandy = false
         for (row in 0 until boardSize) {
             for (col in 0 until boardSize) {
                 val candy = board[row][col] ?: continue
+                if (candy.specialType != SpecialType.NONE) {
+                    hasSpecialCandy = true
+                }
                 val anim = animatedCells[Pair(row, col)] ?: CellAnimation()
                 
                 val x = startX + col * (cellSize + cellGap) + anim.offsetX
@@ -188,6 +221,11 @@ class GameBoardView @JvmOverloads constructor(
                     canvas.drawRoundRect(glowRect, 18f, 18f, glowPaint)
                 }
                 
+                // Özel şeker için ekstra glow efekti
+                if (candy.specialType != SpecialType.NONE) {
+                    drawSpecialCandyGlow(canvas, candy, x, y, cellSize)
+                }
+                
                 // Draw shadow
                 canvas.drawRoundRect(
                     x + 4f, y + 6f,
@@ -197,16 +235,22 @@ class GameBoardView @JvmOverloads constructor(
                 )
                 
                 // Draw candy background with gradient
-                drawCandyGradient(canvas, candy.type, x, y, cellSize, anim.alpha)
+                drawCandyGradient(canvas, candy, x, y, cellSize, anim.alpha)
                 
-                // Draw emoji
+                // Draw emoji veya özel şeker görseli
                 textPaint.alpha = (anim.alpha * 255).toInt()
+                val displayEmoji = candy.getDisplayEmoji()
                 canvas.drawText(
-                    candy.type.emoji,
+                    displayEmoji,
                     centerX,
                     centerY + textPaint.textSize / 3,
                     textPaint
                 )
+                
+                // Özel şeker efektlerini çiz
+                if (candy.specialType != SpecialType.NONE) {
+                    drawSpecialCandyEffects(canvas, candy, x, y, cellSize)
+                }
                 
                 // Draw selection highlight with pulsing effect
                 if (candy.isSelected) {
@@ -226,6 +270,113 @@ class GameBoardView @JvmOverloads constructor(
         
         // Draw particles for explosion effects
         drawParticles(canvas)
+        
+        // Özel şeker varsa sürekli animasyon
+        if (hasSpecialCandy || particles.isNotEmpty()) {
+            postInvalidateOnAnimation()
+        }
+    }
+    
+    private fun drawSpecialCandyGlow(canvas: Canvas, candy: Candy, x: Float, y: Float, size: Float) {
+        val pulseIntensity = (kotlin.math.sin(specialPulsePhase) * 0.3f + 0.7f).toFloat()
+        
+        when (candy.specialType) {
+            SpecialType.STRIPED_H, SpecialType.STRIPED_V -> {
+                // Çizgili şeker için parlak mavi glow
+                bombGlowPaint.color = Color.parseColor("#00E5FF")
+                bombGlowPaint.alpha = (80 * pulseIntensity).toInt()
+                val glowRect = RectF(x - 3f, y - 3f, x + size + 3f, y + size + 3f)
+                canvas.drawRoundRect(glowRect, 16f, 16f, bombGlowPaint)
+            }
+            SpecialType.WRAPPED -> {
+                // Paketli bomba için turuncu-kırmızı glow
+                bombGlowPaint.color = Color.parseColor("#FF5722")
+                bombGlowPaint.alpha = (100 * pulseIntensity).toInt()
+                val glowRect = RectF(x - 5f, y - 5f, x + size + 5f, y + size + 5f)
+                canvas.drawRoundRect(glowRect, 18f, 18f, bombGlowPaint)
+            }
+            SpecialType.COLOR_BOMB -> {
+                // Renk bombası için gökkuşağı glow
+                val rainbowColors = intArrayOf(
+                    Color.parseColor("#FF0000"),
+                    Color.parseColor("#FF7F00"),
+                    Color.parseColor("#FFFF00"),
+                    Color.parseColor("#00FF00"),
+                    Color.parseColor("#0000FF"),
+                    Color.parseColor("#8B00FF")
+                )
+                val colorIndex = ((specialPulsePhase / (2 * Math.PI)) * rainbowColors.size).toInt() % rainbowColors.size
+                bombGlowPaint.color = rainbowColors[colorIndex]
+                bombGlowPaint.alpha = (120 * pulseIntensity).toInt()
+                val glowRect = RectF(x - 6f, y - 6f, x + size + 6f, y + size + 6f)
+                canvas.drawRoundRect(glowRect, 20f, 20f, bombGlowPaint)
+            }
+            else -> {}
+        }
+    }
+    
+    private fun drawSpecialCandyEffects(canvas: Canvas, candy: Candy, x: Float, y: Float, size: Float) {
+        when (candy.specialType) {
+            SpecialType.STRIPED_H -> {
+                // Yatay çizgiler çiz
+                specialPaint.color = Color.WHITE
+                specialPaint.alpha = 180
+                specialPaint.strokeWidth = 2f
+                val lineY1 = y + size * 0.35f
+                val lineY2 = y + size * 0.65f
+                canvas.drawLine(x + 4f, lineY1, x + size - 4f, lineY1, specialPaint)
+                canvas.drawLine(x + 4f, lineY2, x + size - 4f, lineY2, specialPaint)
+            }
+            SpecialType.STRIPED_V -> {
+                // Dikey çizgiler çiz
+                specialPaint.color = Color.WHITE
+                specialPaint.alpha = 180
+                specialPaint.strokeWidth = 2f
+                val lineX1 = x + size * 0.35f
+                val lineX2 = x + size * 0.65f
+                canvas.drawLine(lineX1, y + 4f, lineX1, y + size - 4f, specialPaint)
+                canvas.drawLine(lineX2, y + 4f, lineX2, y + size - 4f, specialPaint)
+            }
+            SpecialType.WRAPPED -> {
+                // Bomba çemberi çiz
+                specialPaint.color = Color.parseColor("#FFEB3B")
+                specialPaint.alpha = 200
+                specialPaint.strokeWidth = 3f
+                specialPaint.style = Paint.Style.STROKE
+                val centerX = x + size / 2
+                val centerY = y + size / 2
+                val radius = size * 0.35f
+                canvas.drawCircle(centerX, centerY, radius, specialPaint)
+            }
+            SpecialType.COLOR_BOMB -> {
+                // Gökkuşağı halka
+                specialPaint.style = Paint.Style.STROKE
+                specialPaint.strokeWidth = 4f
+                val centerX = x + size / 2
+                val centerY = y + size / 2
+                val radius = size * 0.38f
+                
+                // Dönen gökkuşağı efekti
+                val startAngle = (specialPulsePhase * 180 / Math.PI).toFloat()
+                val rainbowColors = intArrayOf(
+                    Color.RED, Color.parseColor("#FF7F00"), Color.YELLOW,
+                    Color.GREEN, Color.BLUE, Color.parseColor("#8B00FF")
+                )
+                
+                for (i in rainbowColors.indices) {
+                    specialPaint.color = rainbowColors[i]
+                    specialPaint.alpha = 220
+                    val sweepAngle = 60f
+                    val arcStartAngle = startAngle + i * 60f
+                    canvas.drawArc(
+                        centerX - radius, centerY - radius,
+                        centerX + radius, centerY + radius,
+                        arcStartAngle, sweepAngle - 5f, false, specialPaint
+                    )
+                }
+            }
+            else -> {}
+        }
     }
     
     private fun getCandyGlowColor(type: CandyType): Int {
@@ -254,7 +405,25 @@ class GameBoardView @JvmOverloads constructor(
             particle.vy += particle.gravity
             particle.life -= 1f / 60f
             particle.alpha = (particle.life / particle.maxLife).coerceIn(0f, 1f)
-            particle.size *= 0.97f
+            
+            // Farklı parçacık tipleri için farklı davranışlar
+            when (particle.particleType) {
+                ParticleType.BOMB_WAVE -> {
+                    particle.size *= 1.05f // Dalga büyüsün
+                    particle.alpha *= 0.92f // Hızlı solsun
+                }
+                ParticleType.STREAK -> {
+                    particle.size *= 0.98f
+                }
+                ParticleType.STAR -> {
+                    particle.size *= 0.95f
+                    particle.vx *= 0.98f
+                    particle.vy *= 0.98f
+                }
+                else -> {
+                    particle.size *= 0.97f
+                }
+            }
             
             if (particle.life <= 0 || particle.alpha <= 0 || particle.size < 0.5f) {
                 iterator.remove()
@@ -266,13 +435,51 @@ class GameBoardView @JvmOverloads constructor(
             // Draw particle
             particlePaint.color = particle.color
             particlePaint.alpha = (particle.alpha * 255).toInt()
-            canvas.drawCircle(particle.x, particle.y, particle.size, particlePaint)
+            
+            when (particle.particleType) {
+                ParticleType.BOMB_WAVE -> {
+                    // Bomba dalgası - halka çiz
+                    particlePaint.style = Paint.Style.STROKE
+                    particlePaint.strokeWidth = 4f * particle.alpha
+                    canvas.drawCircle(particle.x, particle.y, particle.size, particlePaint)
+                    particlePaint.style = Paint.Style.FILL
+                }
+                ParticleType.STAR -> {
+                    // Yıldız şekli
+                    drawStar(canvas, particle.x, particle.y, particle.size, particlePaint)
+                }
+                else -> {
+                    canvas.drawCircle(particle.x, particle.y, particle.size, particlePaint)
+                }
+            }
         }
         
-        // Continue animation if particles exist, using post instead of postInvalidateOnAnimation for better control
+        // Continue animation if particles exist
         if (hasActiveParticles) {
             postInvalidateOnAnimation()
         }
+    }
+    
+    private fun drawStar(canvas: Canvas, cx: Float, cy: Float, size: Float, paint: Paint) {
+        val path = Path()
+        val points = 5
+        val outerRadius = size
+        val innerRadius = size * 0.4f
+        
+        for (i in 0 until points * 2) {
+            val radius = if (i % 2 == 0) outerRadius else innerRadius
+            val angle = (i * Math.PI / points - Math.PI / 2).toFloat()
+            val x = cx + radius * kotlin.math.cos(angle)
+            val y = cy + radius * kotlin.math.sin(angle)
+            
+            if (i == 0) {
+                path.moveTo(x, y)
+            } else {
+                path.lineTo(x, y)
+            }
+        }
+        path.close()
+        canvas.drawPath(path, paint)
     }
     
     private fun spawnExplosionParticles(x: Float, y: Float, color: Int, count: Int = 12) {
@@ -317,7 +524,190 @@ class GameBoardView @JvmOverloads constructor(
                     alpha = 1f,
                     life = 0.3f + Random.nextFloat() * 0.4f,
                     maxLife = 0.7f,
-                    gravity = 0.1f
+                    gravity = 0.1f,
+                    particleType = ParticleType.SPARKLE
+                )
+            )
+        }
+    }
+    
+    // Bomba patlaması için özel parçacıklar
+    fun spawnBombExplosion(positions: List<Pair<Int, Int>>, specialType: SpecialType) {
+        val boardWidth = cellSize * boardSize + cellGap * (boardSize - 1) + boardPadding * 2
+        val boardStartX = (width - boardWidth) / 2 + boardPadding
+        val boardStartY = (height - boardWidth) / 2 + boardPadding
+        
+        when (specialType) {
+            SpecialType.WRAPPED -> {
+                // Bomba patlaması - merkezi dalga efekti
+                if (positions.isNotEmpty()) {
+                    val centerPos = positions[positions.size / 2]
+                    val cx = boardStartX + centerPos.second * (cellSize + cellGap) + cellSize / 2
+                    val cy = boardStartY + centerPos.first * (cellSize + cellGap) + cellSize / 2
+                    
+                    // Büyük patlama dalgası
+                    particles.add(
+                        Particle(
+                            x = cx, y = cy,
+                            vx = 0f, vy = 0f,
+                            size = cellSize * 0.5f,
+                            color = Color.parseColor("#FF5722"),
+                            alpha = 1f,
+                            life = 0.6f, maxLife = 0.6f,
+                            gravity = 0f,
+                            particleType = ParticleType.BOMB_WAVE
+                        )
+                    )
+                    
+                    // İkinci dalga
+                    particles.add(
+                        Particle(
+                            x = cx, y = cy,
+                            vx = 0f, vy = 0f,
+                            size = cellSize * 0.3f,
+                            color = Color.parseColor("#FFEB3B"),
+                            alpha = 1f,
+                            life = 0.5f, maxLife = 0.5f,
+                            gravity = 0f,
+                            particleType = ParticleType.BOMB_WAVE
+                        )
+                    )
+                    
+                    // Yıldız parçacıkları
+                    for (i in 0 until 12) {
+                        val angle = (i.toFloat() / 12) * 2 * Math.PI
+                        val speed = 8f + Random.nextFloat() * 6f
+                        particles.add(
+                            Particle(
+                                x = cx, y = cy,
+                                vx = (Math.cos(angle) * speed).toFloat(),
+                                vy = (Math.sin(angle) * speed).toFloat(),
+                                size = 8f + Random.nextFloat() * 6f,
+                                color = if (Random.nextBoolean()) Color.parseColor("#FF5722") else Color.parseColor("#FFEB3B"),
+                                alpha = 1f,
+                                life = 0.8f, maxLife = 0.8f,
+                                gravity = 0.2f,
+                                particleType = ParticleType.STAR
+                            )
+                        )
+                    }
+                }
+            }
+            SpecialType.STRIPED_H, SpecialType.STRIPED_V -> {
+                // Çizgi patlaması - lazer efekti
+                for ((row, col) in positions) {
+                    val px = boardStartX + col * (cellSize + cellGap) + cellSize / 2
+                    val py = boardStartY + row * (cellSize + cellGap) + cellSize / 2
+                    
+                    // Hızlı hareket eden parçacıklar
+                    val isHorizontal = specialType == SpecialType.STRIPED_H
+                    for (i in 0 until 3) {
+                        particles.add(
+                            Particle(
+                                x = px, y = py,
+                                vx = if (isHorizontal) (if (Random.nextBoolean()) 15f else -15f) else (Random.nextFloat() - 0.5f) * 2f,
+                                vy = if (!isHorizontal) (if (Random.nextBoolean()) 15f else -15f) else (Random.nextFloat() - 0.5f) * 2f,
+                                size = 10f + Random.nextFloat() * 5f,
+                                color = Color.parseColor("#00E5FF"),
+                                alpha = 1f,
+                                life = 0.4f, maxLife = 0.4f,
+                                gravity = 0f,
+                                particleType = ParticleType.STREAK
+                            )
+                        )
+                    }
+                }
+            }
+            SpecialType.COLOR_BOMB -> {
+                // Gökkuşağı patlaması
+                val rainbowColors = intArrayOf(
+                    Color.RED, Color.parseColor("#FF7F00"), Color.YELLOW,
+                    Color.GREEN, Color.BLUE, Color.parseColor("#8B00FF")
+                )
+                
+                for ((row, col) in positions) {
+                    val px = boardStartX + col * (cellSize + cellGap) + cellSize / 2
+                    val py = boardStartY + row * (cellSize + cellGap) + cellSize / 2
+                    
+                    for (i in 0 until 8) {
+                        val angle = (i.toFloat() / 8) * 2 * Math.PI
+                        val speed = 5f + Random.nextFloat() * 7f
+                        particles.add(
+                            Particle(
+                                x = px, y = py,
+                                vx = (Math.cos(angle) * speed).toFloat(),
+                                vy = (Math.sin(angle) * speed).toFloat(),
+                                size = 6f + Random.nextFloat() * 8f,
+                                color = rainbowColors[Random.nextInt(rainbowColors.size)],
+                                alpha = 1f,
+                                life = 0.6f + Random.nextFloat() * 0.3f,
+                                maxLife = 0.9f,
+                                gravity = 0.15f,
+                                particleType = ParticleType.STAR
+                            )
+                        )
+                    }
+                }
+            }
+            else -> {}
+        }
+        
+        invalidate()
+    }
+    
+    // Özel şeker oluşturma animasyonu
+    fun animateSpecialCandyCreation(row: Int, col: Int, specialType: SpecialType) {
+        val key = Pair(row, col)
+        animatedCells[key] = CellAnimation()
+        
+        // Büyüme + parıltı animasyonu
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 400
+            interpolator = OvershootInterpolator(2f)
+            addUpdateListener {
+                val progress = it.animatedValue as Float
+                animatedCells[key]?.let { anim ->
+                    anim.scale = 0.5f + progress * 0.5f
+                    anim.glowIntensity = kotlin.math.sin(progress * Math.PI.toFloat()) * 1.5f
+                }
+                invalidate()
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    animatedCells.remove(key)
+                }
+            })
+            start()
+        }
+        
+        // Parçacık efekti
+        val boardWidth = cellSize * boardSize + cellGap * (boardSize - 1) + boardPadding * 2
+        val boardStartX = (width - boardWidth) / 2 + boardPadding
+        val boardStartY = (height - boardWidth) / 2 + boardPadding
+        val px = boardStartX + col * (cellSize + cellGap) + cellSize / 2
+        val py = boardStartY + row * (cellSize + cellGap) + cellSize / 2
+        
+        val color = when (specialType) {
+            SpecialType.STRIPED_H, SpecialType.STRIPED_V -> Color.parseColor("#00E5FF")
+            SpecialType.WRAPPED -> Color.parseColor("#FF5722")
+            SpecialType.COLOR_BOMB -> Color.parseColor("#FFD700")
+            else -> Color.WHITE
+        }
+        
+        // Yıldız patlaması
+        for (i in 0 until 8) {
+            val angle = (i.toFloat() / 8) * 2 * Math.PI
+            particles.add(
+                Particle(
+                    x = px, y = py,
+                    vx = (Math.cos(angle) * 4f).toFloat(),
+                    vy = (Math.sin(angle) * 4f).toFloat(),
+                    size = 5f + Random.nextFloat() * 4f,
+                    color = color,
+                    alpha = 1f,
+                    life = 0.5f, maxLife = 0.5f,
+                    gravity = 0f,
+                    particleType = ParticleType.STAR
                 )
             )
         }
@@ -330,8 +720,8 @@ class GameBoardView @JvmOverloads constructor(
         return Color.rgb(r, g, b)
     }
 
-    private fun drawCandyGradient(canvas: Canvas, type: CandyType, x: Float, y: Float, size: Float, alpha: Float) {
-        val colors = when (type) {
+    private fun drawCandyGradient(canvas: Canvas, candy: Candy, x: Float, y: Float, size: Float, alpha: Float) {
+        val colors = when (candy.type) {
             CandyType.RED -> intArrayOf(Color.parseColor("#FF5252"), Color.parseColor("#D32F2F"))
             CandyType.BLUE -> intArrayOf(Color.parseColor("#00B0FF"), Color.parseColor("#0091EA"))
             CandyType.GREEN -> intArrayOf(Color.parseColor("#00E676"), Color.parseColor("#00C853"))
@@ -340,9 +730,16 @@ class GameBoardView @JvmOverloads constructor(
             CandyType.ORANGE -> intArrayOf(Color.parseColor("#FF9100"), Color.parseColor("#FF6D00"))
         }
         
+        // Özel şekerler için farklı renkler
+        val finalColors = when (candy.specialType) {
+            SpecialType.WRAPPED -> intArrayOf(Color.parseColor("#FF5722"), Color.parseColor("#E64A19"))
+            SpecialType.COLOR_BOMB -> intArrayOf(Color.parseColor("#9C27B0"), Color.parseColor("#7B1FA2"))
+            else -> colors
+        }
+        
         val gradient = LinearGradient(
             x, y, x + size, y + size,
-            colors[0], colors[1],
+            finalColors[0], finalColors[1],
             Shader.TileMode.CLAMP
         )
         
@@ -523,10 +920,13 @@ class GameBoardView @JvmOverloads constructor(
             // Spawn particles for each exploding candy
             val candy = board[row][col]
             if (candy != null) {
-                val x = boardStartX + col * (cellSize + cellGap) + cellSize / 2
-                val y = boardStartY + row * (cellSize + cellGap) + cellSize / 2
+                val px = boardStartX + col * (cellSize + cellGap) + cellSize / 2
+                val py = boardStartY + row * (cellSize + cellGap) + cellSize / 2
                 val color = getCandyGlowColor(candy.type)
-                spawnExplosionParticles(x, y, color, 15)
+                
+                // Özel şekerler için daha fazla parçacık
+                val particleCount = if (candy.specialType != SpecialType.NONE) 25 else 15
+                spawnExplosionParticles(px, py, color, particleCount)
             }
         }
         
